@@ -39,12 +39,27 @@ def process_message(message):
     global LAST_MESSAGE_ID
     text = message["text"].lower()
 
-    # i.e. responding to a specific message (note that this checks if "hello bot" is anywhere in the message, not just the beginning)
+    # Only respond to messages sent by you.
+    if message['sender_id'] != os.getenv('MY_SENDER_ID'):
+        return
+
+    # Respond to "hello bot".
     if "hello bot" in text:
         send_message("sup")
 
-    LAST_MESSAGE_ID = message["id"]
+    # Respond to "good morning" and "good night" messages.
+    if 'good morning' in text:
+        send_message(f"Good morning, {message['name']}!")
+    elif 'good night' in text:
+        send_message(f"Good night, {message['name']}!")
 
+    # Respond to "tell me a joke".
+    if 'tell me a joke' in text:
+        joke_response = requests.get('https://official-joke-api.appspot.com/jokes/random')
+        joke = joke_response.json()['setup'] + " " + joke_response.json()['punchline']
+        send_message(joke)
+
+    LAST_MESSAGE_ID = message["id"]
 
 def main():
     global LAST_MESSAGE_ID
